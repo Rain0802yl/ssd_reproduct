@@ -187,9 +187,16 @@ def main(argv=None) -> int:
     metrics = run_eval(cfg, args.weights, device, max_images=args.max_images)
     per_image = metrics.pop("_per_image", [])
 
-    out_dir = args.out or os.path.join(
-        cfg["runtime"]["output_dir"], cfg["runtime"]["exp_name"], "eval"
-    )
+    if args.out:
+        out_dir = args.out
+    else:
+        # 默认输出到「权重所在目录」下的 eval/，
+        # 而不是配置里的 exp_name —— 否则评测 cloud5000 的权重时，
+        # 结果会被写进 experiments/quick8000/eval/，很容易找错地方。
+        _wdir = os.path.dirname(os.path.abspath(args.weights))
+        if not os.path.isdir(_wdir):
+            _wdir = os.path.join(cfg["runtime"]["output_dir"], cfg["runtime"]["exp_name"])
+        out_dir = os.path.join(_wdir, "eval")
     os.makedirs(out_dir, exist_ok=True)
 
     # 把 AP 表打印出来（可直接截图进报告）
