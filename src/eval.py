@@ -50,12 +50,6 @@ def run_eval(cfg: Dict, weights: str, device: torch.device, max_images: int = 0)
         test_set.ids = test_set.ids[:max_images]
     print(f"评测集   : {len(test_set)} 张 ({d['year']} {d['test_image_set']})")
 
-    # 容器 /dev/shm 只有 64MB 时，多进程传张量会崩，改用文件共享
-    try:
-        torch.multiprocessing.set_sharing_strategy("file_system")
-    except (RuntimeError, AttributeError):
-        pass
-
     test_loader = DataLoader(
         test_set,
         batch_size=ev["batch_size"],
@@ -178,9 +172,13 @@ def main(argv=None) -> int:
     parser.add_argument("--device", type=str, default=None)
     parser.add_argument("--max-images", type=int, default=0, help="只评测前 N 张（调试用）")
     parser.add_argument("--out", type=str, default=None, help="结果输出目录")
+    parser.add_argument("--num-workers", type=int, default=None,
+                        help="覆盖 DataLoader 进程数；容器 /dev/shm 小时用 0")
     args = parser.parse_args(argv)
 
     cfg = load_config(args.config)
+    if args.num_workers is not None:
+        cfg["data"]["num_workers"] = args.num_workers
     if args.device:
         cfg["runtime"]["device"] = args.device
     device = pick_device(cfg["runtime"]["device"])

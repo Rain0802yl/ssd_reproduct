@@ -69,10 +69,12 @@ def build_loaders(cfg: Dict, seed: int):
     # 改成 file_system 策略后用普通临时文件共享，不再受 /dev/shm 限制。
     # （本机 macOS 默认就是这个策略，切换无副作用）
     # ------------------------------------------------------------------
-    try:
-        torch.multiprocessing.set_sharing_strategy("file_system")
-    except (RuntimeError, AttributeError):
-        pass
+    _strategy = os.environ.get("SSD_SHARING_STRATEGY", "").strip()
+    if _strategy in ("file_system", "file_descriptor"):
+        try:
+            torch.multiprocessing.set_sharing_strategy(_strategy)
+        except (RuntimeError, AttributeError):
+            pass
 
     d = cfg["data"]
     a = cfg["augment"]
