@@ -62,6 +62,18 @@ def pick_device(name: str) -> torch.device:
 
 
 def build_loaders(cfg: Dict, seed: int):
+
+    # ------------------------------------------------------------------
+    # 容器/云服务器常见坑：/dev/shm 默认只有 64MB（Docker 限制），
+    # DataLoader 多进程用它传张量会直接 "No space left on device" / Bus error。
+    # 改成 file_system 策略后用普通临时文件共享，不再受 /dev/shm 限制。
+    # （本机 macOS 默认就是这个策略，切换无副作用）
+    # ------------------------------------------------------------------
+    try:
+        torch.multiprocessing.set_sharing_strategy("file_system")
+    except (RuntimeError, AttributeError):
+        pass
+
     d = cfg["data"]
     a = cfg["augment"]
     size = cfg["model"]["input_size"]
