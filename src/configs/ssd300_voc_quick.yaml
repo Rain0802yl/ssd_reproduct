@@ -1,0 +1,87 @@
+# ============================================================================
+# SSD300 + VOC2007 快速验证配置（8000 迭代）
+#
+# 与官方 examples/ssd/ssd_pascal.py 的差异（报告中需如实说明）：
+#   1. max_iter 从 120000 降到 8000（本机 Apple M5 / MPS 算力限制）
+#   2. 学习率里程碑按同一比例缩放：[80000,100000,120000] -> [5333,6667,8000]
+#   3. batch_size 从 32 降到 16（16GB 统一内存限制）
+#      并依据「线性缩放规则」把 base_lr 从 1e-3 同步减半为 5e-4。
+#      实测：batch=16 配 lr=1e-3 会在第 9 个迭代梯度爆炸成 NaN；
+#            配 lr=5e-4 可稳定训练（已验证 120 迭代无异常）。
+#   4. 主干预训练权重用 torchvision VGG16 ImageNet（作者原始的
+#      atrous-reduced VGG16 caffemodel 是 Caffe 格式，见 README 说明）
+#   其余全部保持官方设置。
+# ============================================================================
+
+data:
+  voc_root: "数据集/VOCdevkit"
+  year: "2007"
+  train_image_set: "trainval"
+  test_image_set: "test"
+  num_classes: 21
+  num_workers: 4
+
+model:
+  input_size: 300
+  pretrained_backbone: true
+  backbone_weights: ".cache/torch/hub/checkpoints/vgg16_features-amdegroot-88682ab5.pth"
+  l2_norm_scale: 20.0
+  min_sizes: [30.0, 60.0, 111.0, 162.0, 213.0, 264.0]
+  max_sizes: [60.0, 111.0, 162.0, 213.0, 264.0, 315.0]
+  aspect_ratios: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+  steps: [8, 16, 32, 64, 100, 300]
+  variances: [0.1, 0.1, 0.2, 0.2]
+  clip_prior: false
+
+augment:
+  mean_bgr: [104, 117, 123]
+  mirror: true
+  use_distort: true
+  use_expand: true
+  use_crop: true
+  expand_prob: 0.5
+  max_expand_ratio: 4.0
+
+loss:
+  neg_pos_ratio: 3.0
+  overlap_threshold: 0.5
+  neg_overlap: 0.5
+  background_label_id: 0
+  loc_weight: 1.0
+
+solver:
+  # 官方为 0.001（对应 batch=32）。batch 减半到 16 后按线性缩放规则降为 5e-4。
+  base_lr: 0.0005
+  momentum: 0.9
+  weight_decay: 0.0005
+  lr_policy: "multistep"
+  gamma: 0.1
+  milestones: [80000, 100000, 120000]
+  max_iter: 8000
+  batch_size: 16
+  scale_milestones: true      # 把官方里程碑按比例缩放到 8000 迭代
+
+detection:
+  confidence_threshold: 0.01
+  nms_threshold: 0.45
+  top_k: 400
+  keep_top_k: 200
+
+eval:
+  batch_size: 8
+  overlap_threshold: 0.5
+  evaluate_difficult_gt: false
+  ap_version: "11point"
+  test_interval: 2000
+
+runtime:
+  output_dir: "experiments"
+  exp_name: "quick8000"
+  device: "auto"
+  log_interval: 10
+  snapshot_interval: 2000
+  seed: 0
+  # ---- 长时间训练安全网（官方无此项；正常训练不会触发）----
+  grad_clip: 0.0            # 0 = 关闭梯度裁剪（对齐官方）
+  skip_nonfinite: true      # loss/梯度出现 NaN 时跳过该步，保护数小时训练
+  max_grad_norm: 2000.0     # 实测正常训练梯度范数中位数 7.6、最大 102

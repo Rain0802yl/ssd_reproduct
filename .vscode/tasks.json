@@ -1,0 +1,61 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "① 训练（8000 迭代，约 4.5 小时）",
+      "type": "shell",
+      "command": "bash 脚本/01_训练_快速8000.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "①' 训练（长训练 15000 迭代，约 8.8 小时）",
+      "type": "shell",
+      "command": "bash 脚本/05_训练_长训练.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "② 继续训练（从快照恢复）",
+      "type": "shell",
+      "command": "bash 脚本/02_继续训练.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "③ 评测 VOC2007 test",
+      "type": "shell",
+      "command": "bash 脚本/03_评测_VOC2007test.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "④ 生成报告图表",
+      "type": "shell",
+      "command": "bash 脚本/04_生成图表.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "⑤ 模块自测（25 项，约 2 分钟）",
+      "type": "shell",
+      "command": "./env_ssd/bin/python -m src.selftest",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "⑥ 【可选】消融实验：依次跑 A1~A4（约 18 小时）",
+      "type": "shell",
+      "command": "bash 脚本/06_消融实验.sh",
+      "options": { "cwd": "${workspaceFolder}" },
+      "presentation": { "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    }
+  ]
+}

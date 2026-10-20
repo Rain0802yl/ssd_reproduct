@@ -1,0 +1,23 @@
+# ============================================================================
+# 消融实验 A1：关闭数据增强
+#
+# 对应论文 Table 2 的第一行 "more data augmentation?"（论文中该项贡献 +8.8% mAP）。
+# 官方训练时使用 光度扰动 + 随机扩展 + 随机裁剪 + 镜像；
+# 本配置只保留「缩放到 300x300 + 减均值」，即 Fast/Faster R-CNN 级别的增强强度。
+#
+# 运行： ./env_ssd/bin/python -m src.train --config src/configs/ablation_A1_无数据增强.yaml
+# ============================================================================
+_base: ssd300_voc_quick.yaml
+
+augment:
+  use_distort: false     # 关闭光度扰动（亮度/对比度/饱和度/色相）
+  use_expand: false      # 关闭随机扩展
+  use_crop: false        # 关闭随机裁剪
+  mirror: true           # 官方基线也保留水平翻转
+
+# 【可选实验】想缩短预算就在下面取消注释（4 组要用同一个数字才可比）：
+# solver:
+#   max_iter: 4000
+
+runtime:
+  exp_name: "A1_无数据增强"

@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "调试：训练（20 迭代快速试跑，约 1 分钟）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.train",
+      "args": [
+        "--config", "src/configs/ssd300_voc_quick.yaml",
+        "--max-iter", "20",
+        "--exp-name", "_debug"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "TORCH_HOME": "${workspaceFolder}/.cache/torch",
+        "MPLCONFIGDIR": "${workspaceFolder}/.cache/matplotlib"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "调试：评测（前 50 张图，约 1 分钟）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.eval",
+      "args": [
+        "--config", "src/configs/ssd300_voc_quick.yaml",
+        "--weights", "experiments/quick8000/last.pth",
+        "--max-images", "50"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "TORCH_HOME": "${workspaceFolder}/.cache/torch",
+        "MPLCONFIGDIR": "${workspaceFolder}/.cache/matplotlib"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "调试：模块自测（25 项检查）",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "src.selftest",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "TORCH_HOME": "${workspaceFolder}/.cache/torch",
+        "MPLCONFIGDIR": "${workspaceFolder}/.cache/matplotlib"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

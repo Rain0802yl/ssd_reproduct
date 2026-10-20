@@ -1,0 +1,63 @@
+{
+  // ======================= 解释器 =======================
+  // 指向项目自带的独立环境（torch 2.14.1 + MPS）
+  "python.defaultInterpreterPath": "${workspaceFolder}/env_ssd/bin/python",
+  "python.terminal.activateEnvironment": false,
+
+  // ======================= 隐藏大目录，避免 VSCode 卡顿 =======================
+  // env_ssd 1.1GB / 数据集 1.7GB / .cache 529MB，加起来 3.3GB，
+  // 如果让 VSCode 去索引会非常卡，所以从资源管理器里隐藏。
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.DS_Store": true,
+    "env_ssd": true,
+    ".cache": true,
+    "数据集/VOCdevkit": true
+  },
+
+  // ======================= 全局搜索时排除 =======================
+  "search.exclude": {
+    "env_ssd": true,
+    ".cache": true,
+    "数据集": true,
+    "experiments": true,
+    "代码/01_官方原始仓库_caffe_ssd分支": true,
+    "**/__pycache__": true
+  },
+
+  // ======================= 文件监听排除（防止频繁重扫）=======================
+  "files.watcherExclude": {
+    "env_ssd/**": true,
+    ".cache/**": true,
+    "数据集/**": true,
+    "experiments/**": true,
+    "**/__pycache__/**": true
+  },
+
+  // ======================= Python 静态分析范围 =======================
+  // 只分析我们自己的代码；官方 Caffe 是 C++，不需要分析
+  "python.analysis.exclude": ["env_ssd", "数据集", ".cache", "代码"],
+  "python.analysis.extraPaths": ["${workspaceFolder}"],
+
+  // ======================= 编辑器 =======================
+  "editor.rulers": [100],
+  "editor.formatOnSave": false,
+  "files.encoding": "utf8",
+  "[python]": { "editor.tabSize": 4 },
+  "[yaml]": { "editor.tabSize": 2 },
+
+  // ======================= DeepSeek Harness（ACP 接入）=======================
+  // 需要先装扩展：formulahendry.acp-client（ACP Client for VS Code）
+  // 装好后：左侧活动栏点 ACP 图标 -> 选中 "DeepSeek Harness" -> Connect
+  // 未装扩展时这两项会被 VSCode 标为未知配置，无害，可删。
+  "acp.agents": {
+    "DeepSeek Harness": {
+      "command": "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh",
+      "args": ["--profile", "acp"],
+      "env": {}
+    }
+  },
+  "acp.defaultWorkingDirectory": "${workspaceFolder}",
+  "acp.autoApprovePermissions": "ask"
+}
